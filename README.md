@@ -12,6 +12,7 @@ This script automates various tasks for the Animix miniapp telegram.
 - **Auto Claim Rewards**
 - **Support Multy accounts**
 - **Support Proxy Usage**
+- **Auto Battle**
 
 ## Prerequisites
 
