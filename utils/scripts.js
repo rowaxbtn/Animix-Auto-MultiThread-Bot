@@ -49,6 +49,30 @@ export async function fetchUserInfo(headers, proxy) {
     return data || {};
 }
 
+// Fetch battle info
+export async function fetchBattleInfo(headers, proxy) {
+    const data = await requestWithRetry("/public/battle/user/info", { method: "GET", headers }, 3, proxy);
+    return data || {};
+}
+
+// get opponents info
+export async function getOpponentsInfo(headers, proxy) {
+    const data = await requestWithRetry("/public/battle/user/opponents", { method: "GET", headers }, 3, proxy);
+    return data || {};
+}
+
+// do attack
+export async function doAttack(headers, proxy, payload) {
+    const data = await requestWithRetry("/public/battle/attack", {
+        method: "POST",
+        headers,
+        body: JSON.stringify(payload),
+    }, 3, proxy);
+    const score = data?.result?.score || 0;
+    const is_win = data?.result?.is_win || false;
+    log.info(`Battle successfully!😘 is_win: ${is_win} score : ${score} `);
+}
+
 // Fetch all achievements
 export async function fetchAllAchievements(headers, proxy) {
     const data = await requestWithRetry("/public/achievement/list", { method: "GET", headers }, 3, proxy);
@@ -67,7 +91,7 @@ export async function fetchPetList(headers, proxy) {
     };
     const petIdsByStarAndClass = {};
     const allPetIds = [];
-
+    const top3PetsStar = data.result.slice().sort(function (a, b) { return b.star - a.star; }).slice(0, 3);
     for (const pet of data.result) {
         if (!petIdsByStarAndClass[pet.star]) petIdsByStarAndClass[pet.star] = {};
         if (!petIdsByStarAndClass[pet.star][pet.class]) petIdsByStarAndClass[pet.star][pet.class] = [];
@@ -80,7 +104,7 @@ export async function fetchPetList(headers, proxy) {
         }
     }
 
-    return { petIdsByStarAndClass, allPetIds };
+    return { petIdsByStarAndClass, allPetIds, top3PetsStar };
 }
 
 // Fetch pet DNA list

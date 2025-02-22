@@ -19,6 +19,9 @@ import {
     claimSeasonPass,
     fetchGatchaBonus,
     claimGatchaBonus,
+    fetchBattleInfo,
+    getOpponentsInfo,
+    doAttack,
 
 } from "./utils/scripts.js";
 
@@ -286,6 +289,23 @@ const checkUserReward = async (headers, proxy) => {
     }
 };
 
+const doBattle = async (headers, proxy, ticketAmount, petData) => {
+    while (ticketAmount > 0) {
+        log.info(` === ticketAmount : ${ticketAmount} === do Battle`);
+        const opponentsInfo = (await getOpponentsInfo(headers, proxy))?.result;
+        const opponent = opponentsInfo?.opponent || "Unknown";
+        const opponent_id = opponent?.telegram_id || 0;
+        if (opponent_id > 0) {
+            await delay(1);
+            const top3PetsStar = petData.top3PetsStar;
+            const payload = { opponent_id: opponent_id, pet_id_1: top3PetsStar[0].pet_id, pet_id_2: top3PetsStar[1].pet_id, pet_id_3: top3PetsStar[2].pet_id };
+            await doAttack(headers, proxy, payload);
+            await delay(5);
+            ticketAmount--;  
+        }
+    }
+}
+
 async function startMission() {
     const users = readUsers("users.txt");
 
@@ -299,50 +319,66 @@ async function startMission() {
             "tg-init-data": user,
         };
 
-        log.info("Fetching Gatcha Bonus...");
-        const gatchaBonus = await fetchGatchaBonus(headers, proxy);
-        const { current_step, is_claimed_god_power, is_claimed_dna, step_bonus_god_power, step_bonus_dna } = gatchaBonus;
-        if (current_step >= step_bonus_god_power && !is_claimed_god_power) {
-            log.info("Claiming God Power Bonus...");
-            await claimGatchaBonus(headers, proxy, 1);
-        } else if (current_step >= step_bonus_dna && !is_claimed_dna) {
-            log.info("Claiming DNA Bonus...");
-            await claimGatchaBonus(headers, proxy, 2);
-        } else {
-            log.warn("No bonus from gatcha to claim.");
-        };
+        // log.info("Fetching Gatcha Bonus...");
+        // const gatchaBonus = await fetchGatchaBonus(headers, proxy);
+        // const { current_step, is_claimed_god_power, is_claimed_dna, step_bonus_god_power, step_bonus_dna } = gatchaBonus;
+        // if (current_step >= step_bonus_god_power && !is_claimed_god_power) {
+        //     log.info("Claiming God Power Bonus...");
+        //     await claimGatchaBonus(headers, proxy, 1);
+        // } else if (current_step >= step_bonus_dna && !is_claimed_dna) {
+        //     log.info("Claiming DNA Bonus...");
+        //     await claimGatchaBonus(headers, proxy, 2);
+        // } else {
+        //     log.warn("No bonus from gatcha to claim.");
+        // };
 
-        let power = await getPower(headers, proxy);
-        while (power >= 1) {
-            log.info("God Power is enough to gatcha new pet. lets go!");
-            power = await getNewPet(headers, proxy);
-            await delay(1);
-        };
+        // let power = await getPower(headers, proxy);
+        // while (power >= 1) {
+        //     log.info("God Power is enough to gatcha new pet. lets go!");
+        //     power = await getNewPet(headers, proxy);
+        //     await delay(1);
+        // };
 
-        log.info("Fetching pet mom and dad can indehoy!❤️");
-        await mergePetIds(headers, proxy);
-        await delay(1);
+        // log.info("Fetching pet mom and dad can indehoy!❤️");
+        // await mergePetIds(headers, proxy);
+        // await delay(1);
+        // try {
+        //     const missionLists = await fetchMissionList(headers, proxy);
+
+        //     log.info("Checking for completed missions...");
+        //     await delay(1);
+        //     const missionIds = missionLists.filter(mission => mission.can_completed).map(mission => mission.mission_id);
+        //     if (missionIds.length > 0) {
+        //         for (const missionId of missionIds) {
+        //             log.info("Claiming mission with ID:", missionId);
+        //             await claimMission(headers, proxy, missionId);
+        //             await delay(1);
+        //         }
+        //     } else {
+        //         log.warn("No completed missions found.");
+        //     };
+        //     log.info("Checking for available missions to enter...");
+        //     await doMissions(headers, proxy)
+        //     await delay(1);
+        //     await checkUserReward(headers, proxy);
+        // } catch (error) {
+        //     log.error("Error fetching Missions data:", error);
+        // }
+
         try {
-            const missionLists = await fetchMissionList(headers, proxy);
-
-            log.info("Checking for completed missions...");
+            log.info("Checking for battle ticket...");
             await delay(1);
-            const missionIds = missionLists.filter(mission => mission.can_completed).map(mission => mission.mission_id);
-            if (missionIds.length > 0) {
-                for (const missionId of missionIds) {
-                    log.info("Claiming mission with ID:", missionId);
-                    await claimMission(headers, proxy, missionId);
-                    await delay(1);
-                }
-            } else {
-                log.warn("No completed missions found.");
-            };
-            log.info("Checking for available missions to enter...");
-            await doMissions(headers, proxy)
-            await delay(1);
-            await checkUserReward(headers, proxy);
+            const battleInfo = (await fetchBattleInfo(headers, proxy))?.result;
+            const ticket = battleInfo?.ticket || "Unknown";
+            let ticketAmount = ticket?.amount || 0;
+            if (ticketAmount > 0) {
+                const petData = await fetchPetList(headers, proxy);
+                const { petIdsByStarAndClass, allPetIds, top3PetsStar } = petData;
+                await doBattle(headers, proxy, ticketAmount, petData);
+                await delay(1);
+            }
         } catch (error) {
-            log.error("Error fetching Missions data:", error);
+            log.error("Error fetching Battle info:", error);
         }
         userCount++;
     }
