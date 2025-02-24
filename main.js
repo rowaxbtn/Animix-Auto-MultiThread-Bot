@@ -22,6 +22,7 @@ import {
     fetchBattleInfo,
     getOpponentsInfo,
     doAttack,
+	claimArenaReward,
 
 } from "./utils/scripts.js";
 
@@ -155,15 +156,15 @@ const mergePetIds = async (headers, proxy) => {
 
         if (momIndex === nextMomIndex) continue;
 
-        if (dad === 125) {
+        if ([124, 121, 122, 199, 125].includes(mom)) {
             dads.splice(dadIndex, 1);
             continue;
         } else {
-            if ([124, 121, 122].includes(mom)) {
+            if ([124, 121, 122, 199].includes(mom)) {
                 log.info(`Skipping merge Dragon, Phoenix, or Unicorn.`);
                 moms.splice(momIndex, 1);
                 continue;
-            } else if ([124, 121, 122].includes(nextMom)) {
+            } else if ([124, 121, 122, 199].includes(nextMom)) {
                 log.info(`Skipping merge Dragon, Phoenix, or Unicorn.`);
                 moms.splice(nextMomIndex, 1);
                 continue;
@@ -366,9 +367,16 @@ async function startMission() {
         }
 
         try {
-            log.info("Checking for battle ticket...");
+            log.info("Checking for battle info...");
             await delay(1);
             const battleInfo = (await fetchBattleInfo(headers, proxy))?.result;
+			log.info("Checking reward...");
+			const not_claimed_rewards_info = battleInfo?.not_claimed_rewards_info;
+			if(not_claimed_rewards_info){
+				const season_id = not_claimed_rewards_info?.season_id || "Unknown";
+				await claimArenaReward(headers, proxy, {season_id:season_id});
+			}
+			log.info("Checking arena ticket...");
             const ticket = battleInfo?.ticket || "Unknown";
             let ticketAmount = ticket?.amount || 0;
             if (ticketAmount > 0) {

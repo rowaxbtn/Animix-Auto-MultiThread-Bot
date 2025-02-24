@@ -55,6 +55,17 @@ export async function fetchBattleInfo(headers, proxy) {
     return data || {};
 }
 
+// Claim arena reward
+export async function claimArenaReward(headers, proxy, payload) {
+    const data = await requestWithRetry("/public/battle/user/reward/claim", {
+        method: "POST",
+        headers,
+        body: JSON.stringify(payload),
+    }, 3, proxy);
+    const rewards = data?.result?.rewards || "Unknown";
+    log.info(`Claim rewards successfully!❤️ Token: ${rewards[0].amount} | Gacha ticket : ${rewards[1].amount} | Super Gacha ticket : ${rewards[2].amount}`);
+}
+
 // get opponents info
 export async function getOpponentsInfo(headers, proxy) {
     const data = await requestWithRetry("/public/battle/user/opponents", { method: "GET", headers }, 3, proxy);
