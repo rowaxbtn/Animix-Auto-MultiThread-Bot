@@ -63,7 +63,7 @@ export async function claimArenaReward(headers, proxy, payload) {
         body: JSON.stringify(payload),
     }, 3, proxy);
     const rewards = data?.result?.rewards || "Unknown";
-    log.info(`Claim rewards successfully!❤️ Token: ${rewards[0].amount} | Gacha ticket : ${rewards[1].amount} | Super Gacha ticket : ${rewards[2].amount}`);
+    log.info(`Claim rewards successfully!🎉 🐟: ${rewards[0].amount} | 🎫 : ${rewards[1].amount} | 🎟️ : ${rewards[2].amount}`);
 }
 
 // get opponents info
@@ -81,7 +81,7 @@ export async function doAttack(headers, proxy, payload) {
     }, 3, proxy);
     const score = data?.result?.score || 0;
     const is_win = data?.result?.is_win || false;
-    log.info(`Battle successfully!😘 is_win: ${is_win} score : ${score} `);
+    log.info(`Battle successfully!🥊 is_win: ${is_win} score : ${score} `);
 }
 
 // Fetch all achievements

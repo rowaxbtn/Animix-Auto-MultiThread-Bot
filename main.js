@@ -367,7 +367,7 @@ async function startMission() {
         }
 
         try {
-            log.info("Checking for battle info...");
+            log.info("Checking for battle info 🔍...");
             await delay(1);
             const battleInfo = (await fetchBattleInfo(headers, proxy))?.result;
 			log.info("Checking reward...");
@@ -376,7 +376,7 @@ async function startMission() {
 				const season_id = not_claimed_rewards_info?.season_id || "Unknown";
 				await claimArenaReward(headers, proxy, {season_id:season_id});
 			}
-			log.info("Checking arena ticket...");
+			log.info("Checking arena ticket 🔍...");
             const ticket = battleInfo?.ticket || "Unknown";
             let ticketAmount = ticket?.amount || 0;
             if (ticketAmount > 0) {
