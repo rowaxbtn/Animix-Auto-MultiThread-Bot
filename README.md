@@ -27,8 +27,8 @@ This script automates various tasks for the Animix miniapp telegram.
 
 1. Clone the repository:
     ```sh
-    git clone https://github.com/airdropinsiders/Animix-Auto-Bot.git
-    cd Animix-Auto-Bot
+    git clone https://github.com/rowaxbtn/Animix-Auto-MultiThread-Bot
+    cd Animix-Auto-MultiThread-Bot
     ```
 
 2. Install the required dependencies:
