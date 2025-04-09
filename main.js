@@ -162,11 +162,11 @@ const mergePetIds = async (headers, proxy) => {
             continue;
         } else {
             if ([124, 121, 122, 199].includes(mom)) {
-                log.info(`Skipping merge Dragon, Phoenix, or Unicorn.`);
+                //log.info(`Skipping merge Dragon, Phoenix, or Unicorn.`);
                 moms.splice(momIndex, 1);
                 continue;
             } else if ([124, 121, 122, 199].includes(nextMom)) {
-                log.info(`Skipping merge Dragon, Phoenix, or Unicorn.`);
+                //log.info(`Skipping merge Dragon, Phoenix, or Unicorn.`);
                 moms.splice(nextMomIndex, 1);
                 continue;
             }
@@ -335,7 +335,7 @@ async function startMission(user,userCount) {
         power = await getNewPet(headers, proxy);
         await delay(1);
     };
-
+	
     log.info("Fetching pet mom and dad can indehoy!❤️");
     await mergePetIds(headers, proxy);
     await delay(1);
@@ -372,15 +372,20 @@ async function startMission(user,userCount) {
             const season_id = not_claimed_rewards_info?.season_id || "Unknown";
             await claimArenaReward(headers, proxy, {season_id:season_id});
         }
-        log.info("Checking arena ticket 🔍...");
-        const ticket = battleInfo?.ticket || "Unknown";
-        let ticketAmount = ticket?.amount || 0;
-        if (ticketAmount > 0) {
-            const petData = await fetchPetList(headers, proxy);
-            const { petIdsByStarAndClass, allPetIds, top3PetsStar } = petData;
-            await doBattle(headers, proxy, ticketAmount, petData);
-            await delay(1);
-        }
+		const is_end_season = battleInfo?.is_end_season || false;
+		if(!is_end_season){
+			log.info("Checking arena ticket 🔍...");
+			const ticket = battleInfo?.ticket || "Unknown";
+			let ticketAmount = ticket?.amount || 0;
+			if (ticketAmount > 0) {
+				const petData = await fetchPetList(headers, proxy);
+				const { petIdsByStarAndClass, allPetIds, top3PetsStar } = petData;
+				await doBattle(headers, proxy, ticketAmount, petData);
+				await delay(1);
+			}
+		}else{
+			log.info("Season end, waiting for reward...");
+		}
     } catch (error) {
         log.error("Error fetching Battle info:", error);
     }    
